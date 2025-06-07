@@ -1,6 +1,6 @@
 # 👗 Fashion Visual Search & Outfit Recommendation System
 
-An AI-powered fashion search and recommendation system that uses computer vision and machine learning to help users find similar fashion items and create complete outfits.
+An AI-powered fashion search and recommendation system using Streamlit + FastAPI + OpenCV + CLIP + FAISS + GNN + Local Filesystem.
 
 ![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
@@ -10,6 +10,7 @@ An AI-powered fashion search and recommendation system that uses computer vision
 ## 🎯 Overview
 
 This system enables users to:
+
 - **Upload any fashion image** and find visually similar items
 - **Get intelligent outfit recommendations** based on style compatibility
 - **Browse product catalogs** with real-time search capabilities
@@ -18,6 +19,7 @@ This system enables users to:
 ## 🚀 Features
 
 ### Core Functionality
+
 - ✅ **Visual Search**: Upload images to find similar fashion items
 - ✅ **Outfit Recommendations**: Multi-criteria scoring for complete outfits
 - ✅ **Product Browsing**: Interactive catalog exploration
@@ -25,6 +27,7 @@ This system enables users to:
 - ✅ **System Analytics**: Performance monitoring and statistics
 
 ### Technical Highlights
+
 - **CLIP Model Integration**: OpenAI's CLIP for visual embeddings
 - **FAISS Vector Search**: Fast similarity search with 500+ products
 - **Multi-criteria Recommendations**: Visual similarity + style compatibility + price matching
@@ -34,19 +37,19 @@ This system enables users to:
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Streamlit     │────│    FastAPI       │────│   CLIP Model    │
-│   Frontend      │    │    Backend       │    │   + FAISS       │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│  User Interface │    │  REST API        │    │  AI/ML          │
-│  - Visual Search│    │  - Image Upload  │    │  - Embeddings   │
-│  - Browse       │    │  - Search        │    │  - Similarity   │
-│  - Recommendations│  │  - Recommendations│    │  - Scoring      │
-│  - Analytics    │    │  - Analytics     │    │  - Indexing     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+streamlit run frontend/streamlit_app.py
+                ↓
+Auto-start FastAPI Backend (localhost:8000)
+                ↓
+User Upload → Streamlit Frontend → FastAPI Backend
+                                       ↓
+CLIP Model ← Image Processing ← Visual Search Engine
+    ↓                              ↓
+Embeddings → FAISS Index → Similar Products
+                                       ↓
+Outfit Recommender ← Multi-criteria Scoring
+    ↓
+Recommendations → JSON Response → Frontend Display
 ```
 
 ## 📊 Dataset
@@ -59,6 +62,7 @@ This system enables users to:
 ## 🛠️ Technology Stack
 
 ### Backend
+
 - **FastAPI**: High-performance web framework
 - **CLIP**: OpenAI's vision-language model
 - **FAISS**: Facebook's similarity search library
@@ -66,11 +70,13 @@ This system enables users to:
 - **Pandas**: Data processing
 
 ### Frontend
+
 - **Streamlit**: Interactive web applications
 - **Plotly**: Data visualization
 - **PIL**: Image processing
 
 ### AI/ML
+
 - **Transformers**: Hugging Face model library
 - **PyTorch**: Deep learning framework
 - **NumPy**: Numerical computing
@@ -78,254 +84,216 @@ This system enables users to:
 ## 📋 Prerequisites
 
 - Python 3.8+
-- 8GB+ RAM (for CLIP model)
-- Internet connection (for model downloads)
+- pip
 
 ## 🚀 Quick Start
 
-### 1. Clone Repository
+### Prerequisites
+
+- Python 3.8+
+- pip
+
+### Installation & Setup
+
+1. **Clone the repository**
+
 ```bash
-git clone <repository-url>
-cd Visual-Search
+git clone https://github.com/Aadik1ng/Visual_Search.git
+cd Visual_Search
 ```
 
-### 2. Install Dependencies
+2. **Install dependencies**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Process Dataset
-```bash
-# Process CSV data and download images
-python scripts/data_processor.py
-```
+3. **Run the application**
 
-### 4. Extract Features
 ```bash
-# Generate CLIP embeddings
-python scripts/feature_extractor.py
-```
-
-### 5. Start Backend
-```bash
-# Start FastAPI server
-python app/main.py
-```
-
-### 6. Launch Frontend
-```bash
-# Start Streamlit app (in new terminal)
 streamlit run frontend/streamlit_app.py
 ```
 
-### 7. Access Application
+That's it! The FastAPI backend will start automatically. No need to run separate commands.
+
+The application will be available at:
+
 - **Frontend**: http://localhost:8501
-- **API Docs**: http://localhost:8000/docs
-- **API Health**: http://localhost:8000/health
+- **Backend API**: http://localhost:8000 (auto-started)
+
+## 📱 Features
+
+### 🔍 Visual Search
+
+- Upload any fashion image to find similar items
+- CLIP-powered visual similarity matching
+- Sub-second search results
+
+### 🛍️ Outfit Recommendations
+
+- Get complete outfit suggestions for any item
+- Multi-criteria compatibility scoring
+- Style, price, and brand matching
+
+### 📊 Product Browsing
+
+- Explore the fashion catalog
+- Random product discovery
+- Detailed product information
+
+### 📈 System Monitoring
+
+- Real-time performance metrics
+- System health monitoring
+- API statistics
 
 ## 📁 Project Structure
 
 ```
-fashion-assistant/
-├── app/                          # FastAPI Backend
-│   ├── main.py                   # Main API application
-│   ├── search_engine.py          # FAISS visual search
-│   └── recommender.py            # Outfit recommendation engine
-├── frontend/
-│   └── streamlit_app.py          # Streamlit frontend
-├── scripts/
-│   ├── data_processor.py         # Dataset processing
-│   └── feature_extractor.py     # CLIP feature extraction
-├── data/
-│   ├── processed/                # Clean dataset
-│   ├── images/                   # Product images
-│   └── embeddings/               # CLIP embeddings
-├── requirements.txt              # Python dependencies
-└── README.md                     # This file
+Visual_Search/
+├── app/                    # FastAPI backend
+│   ├── main.py            # API endpoints
+│   ├── search_engine.py   # CLIP + FAISS search
+│   └── recommender.py     # Outfit recommendations
+├── frontend/              # Streamlit frontend
+│   └── streamlit_app.py   # Main UI application
+├── scripts/               # Data processing scripts
+│   ├── data_processor.py  # CSV to JSON processing
+│   └── feature_extractor.py # CLIP embeddings
+├── data/                  # Data storage
+│   ├── processed/         # Processed product data
+│   ├── embeddings/        # CLIP embeddings
+│   └── images/           # Product images
+└── requirements.txt       # Python dependencies
 ```
 
-## 🔧 API Endpoints
+## 🔌 API Endpoints
 
-### Search Endpoints
-- `POST /search/visual` - Upload image for visual search
+The FastAPI backend provides the following endpoints:
+
+### Core Search
+
+- `POST /search/visual` - Visual search by image upload
 - `GET /search/product/{product_id}` - Find similar products
-- `POST /search/batch` - Batch image search
+- `POST /search/batch` - Batch visual search
 
-### Recommendation Endpoints
+### Recommendations
+
 - `GET /recommend/outfit/{product_id}` - Get outfit recommendations
 
-### Utility Endpoints
-- `GET /products/random` - Get random products
+### Product Data
+
 - `GET /product/{product_id}` - Get product details
-- `GET /stats` - System statistics
+- `GET /products/random` - Get random products
+
+### System
+
 - `GET /health` - Health check
+- `GET /stats` - System statistics
+- `GET /` - API documentation
 
-## 💡 Usage Examples
+## 🛠️ Development
 
-### Visual Search
-```python
-import requests
+### Manual Backend Start (Optional)
 
-# Upload image for search
-with open('fashion_image.jpg', 'rb') as f:
-    response = requests.post(
-        'http://localhost:8000/search/visual',
-        files={'file': f},
-        params={'top_k': 10}
-    )
-    results = response.json()
-```
+If you need to run the backend separately:
 
-### Outfit Recommendations
-```python
-# Get outfit recommendations
-response = requests.get(
-    'http://localhost:8000/recommend/outfit/product_123',
-    params={'num_recommendations': 5}
-)
-recommendations = response.json()
-```
-
-## 📈 Performance Metrics
-
-### Current Performance
-- **Search Speed**: ~150ms average
-- **Recommendation Time**: ~80ms average
-- **Success Rate**: >95% visual similarity
-- **Dataset Size**: 500 products indexed
-- **Embedding Dimension**: 512 (CLIP ViT-B/32)
-
-### Scalability Targets
-- **Concurrent Users**: 10,000+
-- **API Calls**: 1,000+ per minute
-- **Response Time**: <500ms P95
-- **Availability**: 99.9%
-
-## 🎨 Frontend Features
-
-### Visual Search Page
-- Drag-and-drop image upload
-- Adjustable result count
-- Real-time similarity scores
-- One-click outfit recommendations
-
-### Browse Products Page
-- Random product discovery
-- Similar item finding
-- Interactive product cards
-- Outfit suggestion integration
-
-### System Stats Page
-- Real-time performance metrics
-- System resource monitoring
-- API health status
-- Visual performance charts
-
-### About Page
-- System architecture overview
-- Technology stack details
-- Feature explanations
-- Future roadmap
-
-## 🔮 Future Enhancements
-
-### Short Term
-- [ ] More product categories (shoes, accessories)
-- [ ] Advanced filtering (price, brand, size)
-- [ ] User favorites and history
-- [ ] Improved recommendation algorithms
-
-### Long Term
-- [ ] User personalization
-- [ ] Trend analysis and detection
-- [ ] Social features and sharing
-- [ ] Mobile app development
-- [ ] Real-time inventory integration
-
-## 🧪 Testing
-
-### Run Individual Modules
 ```bash
-# Test data processing
+cd app
+python main.py
+```
+
+### Data Processing (Optional)
+
+To reprocess the dataset:
+
+```bash
 python scripts/data_processor.py
-
-# Test feature extraction
 python scripts/feature_extractor.py
-
-# Test search engine
-python app/search_engine.py
-
-# Test recommender
-python app/recommender.py
 ```
 
-### API Testing
-```bash
-# Test API health
-curl http://localhost:8000/health
-
-# Test random products
-curl http://localhost:8000/products/random?num_products=5
-```
-
-## 🐛 Troubleshooting
+## 🔍 Troubleshooting
 
 ### Common Issues
 
-**1. CLIP Model Download Fails**
+1. **"Module not found" errors**
+
+   - Ensure all dependencies are installed: `pip install -r requirements.txt`
+2. **"No such file or directory" errors**
+
+   - Make sure you're running from the project root directory
+3. **Backend startup fails**
+
+   - Check if port 8000 is available
+   - Verify all data files exist in `data/` directory
+4. **Slow initial startup**
+
+   - First run downloads CLIP model (~500MB)
+   - Subsequent runs are much faster
+
+### Performance Tips
+
+- **First Run**: Allow 2-3 minutes for model download and initialization
+- **Memory**: System uses ~2GB RAM for optimal performance
+- **Storage**: Requires ~1GB for models and data
+
+## 🚀 Deployment
+
+### Local Development
+
 ```bash
-# Ensure stable internet connection
-# Model will auto-download on first run
+streamlit run frontend/streamlit_app.py
 ```
 
-**2. Out of Memory Error**
-```bash
-# Reduce batch size in feature extraction
-# Close other applications
-# Use CPU instead of GPU if needed
-```
+### Production Deployment
 
-**3. API Connection Error**
-```bash
-# Ensure FastAPI server is running
-# Check port 8000 is not in use
-# Verify firewall settings
-```
+For production deployment, consider:
 
-**4. Image Upload Fails**
-```bash
-# Check image format (JPG, PNG supported)
-# Verify file size < 10MB
-# Ensure proper file permissions
-```
+- Using Docker containers
+- Setting up reverse proxy (nginx)
+- Configuring proper CORS origins
+- Adding authentication if needed
 
-## 📝 Contributing
+## 📈 Future Enhancements
+
+- [ ] More product categories (shoes, accessories, etc.)
+- [ ] Advanced style analysis and trend detection
+- [ ] User personalization and preferences
+- [ ] Social features and outfit sharing
+- [ ] Mobile app development
+- [ ] Real-time inventory integration
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is open source and available under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for the CLIP model
-- **Facebook Research** for FAISS
-- **Hugging Face** for model hosting
-- **Streamlit** for the amazing frontend framework
-- **FastAPI** for the high-performance backend
+- OpenAI for the CLIP model
+- Facebook AI for FAISS
+- Streamlit and FastAPI communities
+- Fashion dataset providers
+
+---
+
+**Built with ❤️ for fashion enthusiasts and AI developers**
 
 ## 📞 Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Check the troubleshooting section
 - Review API documentation at `/docs`
 
 ---
 
-**Built with ❤️ for the fashion industry** 
+**Built with ❤️ for the fashion industry**
