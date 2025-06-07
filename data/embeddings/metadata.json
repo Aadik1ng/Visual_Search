@@ -1,0 +1,8 @@
+{
+  "model_name": "openai/clip-vit-base-patch32",
+  "embedding_dim": 512,
+  "num_embeddings": 500,
+  "extraction_time": 28.538416862487793,
+  "device_used": "cpu",
+  "batch_size": 16
+}
