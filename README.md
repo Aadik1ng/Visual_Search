@@ -1,6 +1,6 @@
 # 👗 Fashion Visual Search & Outfit Recommendation System
 
-An AI-powered fashion search and recommendation system using Streamlit + FastAPI + OpenCV + CLIP + FAISS + GNN + Local Filesystem.
+An AI-powered fashion search and recommendatiFSon system using Streamlit + FastAPI + OpenCV + CLIP + FAISS + GNN + Local Filesystem.
 
 ![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
@@ -111,7 +111,7 @@ pip install -r requirements.txt
 3. **Run the application**
 
 ```bash
-streamlit run frontend/streamlit_app.py
+streamlit run frontend/streamlit_app.py --server.headless true --server.port 8501
 ```
 
 That's it! The FastAPI backend will start automatically. No need to run separate commands.
