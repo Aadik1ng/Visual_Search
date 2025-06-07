@@ -7,6 +7,11 @@ import time
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import subprocess
+import threading
+import sys
+import os
+from pathlib import Path
 
 # Page configuration
 st.set_page_config(
@@ -18,6 +23,73 @@ st.set_page_config(
 
 # API Configuration
 API_BASE_URL = "http://localhost:8000"
+
+# Global variable to track if FastAPI server is started
+if 'fastapi_started' not in st.session_state:
+    st.session_state.fastapi_started = False
+
+def start_fastapi_server():
+    """Start the FastAPI server in a separate thread"""
+    try:
+        # Get the project root directory
+        current_dir = Path(__file__).parent
+        project_root = current_dir.parent
+        app_dir = project_root / "app"
+        
+        # Change to the app directory and start the server
+        os.chdir(str(app_dir))
+        
+        # Start FastAPI server
+        subprocess.run([
+            sys.executable, "-m", "uvicorn", "main:app",
+            "--host", "0.0.0.0",
+            "--port", "8000",
+            "--reload"
+        ])
+    except Exception as e:
+        print(f"Error starting FastAPI server: {e}")
+
+def ensure_fastapi_running():
+    """Ensure FastAPI server is running, start it if not"""
+    if not st.session_state.fastapi_started:
+        if not check_api_health():
+            st.info("🚀 Starting FastAPI server...")
+            
+            # Start server in background thread
+            server_thread = threading.Thread(target=start_fastapi_server, daemon=True)
+            server_thread.start()
+            
+            # Wait for server to start
+            max_wait = 30  # seconds
+            wait_time = 0
+            
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            while wait_time < max_wait:
+                if check_api_health():
+                    st.session_state.fastapi_started = True
+                    progress_bar.progress(100)
+                    status_text.success("✅ FastAPI server started successfully!")
+                    time.sleep(1)
+                    progress_bar.empty()
+                    status_text.empty()
+                    break
+                
+                wait_time += 1
+                progress = int((wait_time / max_wait) * 100)
+                progress_bar.progress(progress)
+                status_text.text(f"Starting server... ({wait_time}/{max_wait}s)")
+                time.sleep(1)
+            
+            if wait_time >= max_wait:
+                progress_bar.empty()
+                status_text.error("❌ Failed to start FastAPI server. Please check the logs.")
+                return False
+        else:
+            st.session_state.fastapi_started = True
+    
+    return True
 
 # Custom CSS for better styling
 st.markdown("""
@@ -154,13 +226,19 @@ def display_product_card(product, show_similarity=False, show_compatibility=Fals
                 st.markdown(f'<div class="recommendation-reason">{product["reason"]}</div>', unsafe_allow_html=True)
 
 def main():
+    # Ensure FastAPI server is running
+    if not ensure_fastapi_running():
+        st.error("⚠️ Failed to start the backend server. Please check your setup.")
+        st.stop()
+    
     # Header
     st.markdown('<h1 class="main-header">👗 Fashion Visual Search</h1>', unsafe_allow_html=True)
     
-    # Check API health
+    # Check API health (should be running now)
     if not check_api_health():
-        st.error("⚠️ API is not running. Please start the FastAPI server first.")
-        st.code("python app/main.py")
+        st.error("⚠️ API is not responding. Please wait a moment and refresh the page.")
+        if st.button("🔄 Retry Connection"):
+            st.rerun()
         return
     
     # Sidebar
@@ -394,9 +472,14 @@ def about_page():
     This is an AI-powered fashion search and recommendation system that uses computer vision 
     and machine learning to help users find similar fashion items and create complete outfits.
     
+    ## 🚀 Quick Start
+    Simply run: `streamlit run frontend/streamlit_app.py`
+    
+    The FastAPI backend server will start automatically! No need to run separate commands.
+    
     ## 🔧 Technology Stack
     - **Frontend**: Streamlit
-    - **Backend**: FastAPI
+    - **Backend**: FastAPI (auto-started)
     - **AI Models**: CLIP (OpenAI) for visual embeddings
     - **Search**: FAISS for fast similarity search
     - **Recommendations**: Multi-criteria scoring system
@@ -406,6 +489,7 @@ def about_page():
     - **Outfit Recommendations**: Get complete outfit suggestions
     - **Product Browsing**: Explore the fashion catalog
     - **Real-time Performance**: Sub-second search results
+    - **Auto-startup**: Backend starts automatically with frontend
     
     ## 📊 Current Dataset
     - **500 Products** processed and indexed
@@ -413,10 +497,11 @@ def about_page():
     - **Real product data** from fashion retailers
     
     ## 🎨 How It Works
-    1. **Image Processing**: CLIP model extracts visual features
-    2. **Similarity Search**: FAISS finds visually similar items
-    3. **Outfit Matching**: Multi-criteria algorithm suggests complementary pieces
-    4. **Real-time Results**: Optimized for fast response times
+    1. **Auto-startup**: FastAPI server launches automatically
+    2. **Image Processing**: CLIP model extracts visual features
+    3. **Similarity Search**: FAISS finds visually similar items
+    4. **Outfit Matching**: Multi-criteria algorithm suggests complementary pieces
+    5. **Real-time Results**: Optimized for fast response times
     
     ## 🔮 Future Enhancements
     - More product categories
@@ -428,6 +513,10 @@ def about_page():
     # System architecture diagram (text-based)
     st.subheader("System Architecture")
     st.code("""
+    streamlit run frontend/streamlit_app.py
+                    ↓
+    Auto-start FastAPI Backend (localhost:8000)
+                    ↓
     User Upload → Streamlit Frontend → FastAPI Backend
                                            ↓
     CLIP Model ← Image Processing ← Visual Search Engine
