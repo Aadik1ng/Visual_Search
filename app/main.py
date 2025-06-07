@@ -6,6 +6,8 @@ import io
 import time
 from typing import List, Optional
 import uvicorn
+import os
+from pathlib import Path
 
 from search_engine import VisualSearchEngine
 from recommender import OutfitRecommender
@@ -38,18 +40,32 @@ async def startup_event():
     print("Initializing Fashion Search API...")
     
     try:
-        # Initialize search engine
-        print("Loading visual search engine...")
-        search_engine = VisualSearchEngine()
+        # Ensure we're in the correct directory
+        from pathlib import Path
         
-        # Initialize outfit recommender
+        # Get the directory where this script is located
+        current_dir = Path(__file__).parent
+        project_root = current_dir.parent
+        data_dir = project_root / "data"
+        
+        print(f"Working directory: {os.getcwd()}")
+        print(f"Project root: {project_root}")
+        print(f"Data directory: {data_dir}")
+        
+        # Initialize search engine with absolute data path
+        print("Loading visual search engine...")
+        search_engine = VisualSearchEngine(data_dir=str(data_dir))
+        
+        # Initialize outfit recommender with absolute data path
         print("Loading outfit recommender...")
-        outfit_recommender = OutfitRecommender()
+        outfit_recommender = OutfitRecommender(data_dir=str(data_dir))
         
         print("Fashion Search API initialized successfully!")
         
     except Exception as e:
         print(f"Error initializing API: {e}")
+        import traceback
+        traceback.print_exc()
         raise e
 
 @app.get("/")
