@@ -102,27 +102,87 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .product-card {
-        border: 1px solid #ddd;
+        border: 2px solid #e1e8ed;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .product-image {
         border-radius: 10px;
-        padding: 1rem;
-        margin: 0.5rem;
-        background-color: #f9f9f9;
+        margin-bottom: 1rem;
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+    .product-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    .product-brand {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        font-style: italic;
     }
     .similarity-score {
         background-color: #e8f4fd;
-        padding: 0.2rem 0.5rem;
-        border-radius: 5px;
+        padding: 0.3rem 0.6rem;
+        border-radius: 8px;
         font-weight: bold;
+        font-size: 0.85rem;
+        margin: 0.3rem 0;
+        display: inline-block;
     }
     .price-tag {
         color: #2E86AB;
         font-weight: bold;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
+        margin: 0.5rem 0;
+        background-color: #f0f9ff;
+        padding: 0.3rem 0.6rem;
+        border-radius: 8px;
+        display: inline-block;
     }
     .recommendation-reason {
         font-style: italic;
-        color: #666;
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        line-height: 1.3;
+    }
+    .product-actions {
+        margin-top: auto;
+        padding-top: 1rem;
+        width: 100%;
+    }
+    .stButton > button {
+        width: 100%;
+        margin: 0.2rem 0;
+        border-radius: 8px;
         font-size: 0.9rem;
+    }
+    .product-grid {
+        gap: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -191,23 +251,34 @@ def get_system_stats():
     except:
         return None
 
-def display_product_card(product, show_similarity=False, show_compatibility=False):
+def display_product_card(product, show_similarity=False, show_compatibility=False, show_actions=False, product_id_for_actions=None):
     """Display a product card with image and details"""
-    # Use container instead of columns to avoid nesting issues
+    # Create a styled container for the product card
     with st.container():
+        st.markdown('<div class="product-card">', unsafe_allow_html=True)
+        
         # Display product image
         try:
             if product.get('image_url'):
-                st.image(product['image_url'], width=150, caption=product.get('product_name', 'Product'))
+                st.image(
+                    product['image_url'], 
+                    width=180, 
+                    use_column_width=False,
+                    caption=None
+                )
             else:
-                st.write("No image available")
+                st.markdown('<div style="height: 180px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 10px; margin-bottom: 1rem;"><p>No image available</p></div>', unsafe_allow_html=True)
         except:
-            st.write("Image not available")
+            st.markdown('<div style="height: 180px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 10px; margin-bottom: 1rem;"><p>Image not available</p></div>', unsafe_allow_html=True)
         
         # Product details
-        st.markdown(f"**{product.get('product_name', 'Unknown Product')}**")
-        st.markdown(f"*Brand:* {product.get('brand', 'Unknown')}")
+        product_name = product.get('product_name', 'Unknown Product')
+        brand = product.get('brand', 'Unknown')
         
+        st.markdown(f'<div class="product-title">{product_name}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="product-brand">{brand}</div>', unsafe_allow_html=True)
+        
+        # Price
         price = product.get('selling_price', 0)
         if price > 0:
             st.markdown(f'<div class="price-tag">${price:.2f}</div>', unsafe_allow_html=True)
@@ -224,6 +295,23 @@ def display_product_card(product, show_similarity=False, show_compatibility=Fals
             
             if 'reason' in product:
                 st.markdown(f'<div class="recommendation-reason">{product["reason"]}</div>', unsafe_allow_html=True)
+        
+        # Action buttons if requested
+        if show_actions and product_id_for_actions:
+            st.markdown('<div class="product-actions">', unsafe_allow_html=True)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔍 Find Similar", key=f"similar_{product_id_for_actions}", help="Find similar products"):
+                    st.session_state[f"show_similar_{product_id_for_actions}"] = True
+            
+            with col2:
+                if st.button("👗 Get Outfit", key=f"outfit_{product_id_for_actions}", help="Get outfit recommendations"):
+                    st.session_state[f"show_outfit_{product_id_for_actions}"] = True
+            
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 def main():
     # Ensure FastAPI server is running
@@ -295,22 +383,28 @@ def visual_search_page():
                         # Display results
                         st.subheader("Search Results")
                         
-                        # Create columns for grid layout
+                        # Create improved grid layout for search results
                         cols_per_row = 3
+                        st.markdown('<div class="product-grid">', unsafe_allow_html=True)
+                        
                         for i in range(0, len(results['results']), cols_per_row):
-                            cols = st.columns(cols_per_row)
+                            cols = st.columns(cols_per_row, gap="large")
                             
                             for j, col in enumerate(cols):
                                 if i + j < len(results['results']):
                                     product = results['results'][i + j]
                                     
                                     with col:
-                                        st.markdown(f"**Rank {product['rank']}**")
+                                        # Add rank indicator
+                                        st.markdown(f'<div style="text-align: center; background-color: #2E86AB; color: white; padding: 0.2rem; border-radius: 5px; margin-bottom: 0.5rem; font-weight: bold;">Rank #{product["rank"]}</div>', unsafe_allow_html=True)
+                                        
                                         display_product_card(product, show_similarity=True)
                                         
                                         # Add outfit recommendation button
-                                        if st.button(f"Get Outfit Ideas", key=f"outfit_{product['product_id']}"):
+                                        if st.button(f"👗 Get Outfit Ideas", key=f"outfit_{product['product_id']}", help="Get outfit recommendations for this item"):
                                             show_outfit_recommendations(product['product_id'], product['product_name'])
+                        
+                        st.markdown('</div>', unsafe_allow_html=True)
 
 def show_outfit_recommendations(product_id, product_name):
     """Show outfit recommendations for a selected product"""
@@ -338,42 +432,83 @@ def browse_products_page():
     st.header("Browse Products")
     st.write("Explore our fashion collection and find similar items!")
     
-    # Get random products
-    if st.button("🔄 Load Random Products"):
-        with st.spinner("Loading products..."):
-            products = get_random_products(num_products=12)
-            
-            if products:
-                st.session_state.browse_products = products
+    # Control buttons
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        if st.button("🔄 Load Random Products", type="primary"):
+            with st.spinner("Loading products..."):
+                products = get_random_products(num_products=12)
+                
+                if products:
+                    st.session_state.browse_products = products
+                    # Clear any previous selections
+                    for key in list(st.session_state.keys()):
+                        if key.startswith(('show_similar_', 'show_outfit_')):
+                            del st.session_state[key]
+    
+    with col2:
+        if 'browse_products' in st.session_state:
+            num_products = st.selectbox("Products per page", [6, 9, 12, 15], index=2)
     
     # Display products if available
     if 'browse_products' in st.session_state:
         products = st.session_state.browse_products
         
+        st.markdown("---")
         st.subheader(f"Showing {len(products)} Products")
         
-        # Create grid layout
+        # Create improved grid layout with equal column heights
         cols_per_row = 3
+        
+        # Add some spacing
+        st.markdown('<div class="product-grid">', unsafe_allow_html=True)
+        
         for i in range(0, len(products), cols_per_row):
-            cols = st.columns(cols_per_row)
+            # Create columns with equal width and gap
+            cols = st.columns(cols_per_row, gap="large")
             
             for j, col in enumerate(cols):
                 if i + j < len(products):
                     product = products[i + j]
+                    product_id = product['product_id']
                     
                     with col:
-                        display_product_card(product)
-                        
-                        # Buttons for actions (avoid nested columns)
-                        if st.button("Find Similar", key=f"similar_{product['product_id']}"):
-                            show_similar_products(product['product_id'], product['product_name'])
-                        
-                        if st.button("Get Outfit", key=f"browse_outfit_{product['product_id']}"):
-                            show_outfit_recommendations(product['product_id'], product['product_name'])
+                        # Display product card with integrated actions
+                        display_product_card(
+                            product, 
+                            show_actions=True, 
+                            product_id_for_actions=product_id
+                        )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Handle action results below the grid
+        st.markdown("---")
+        
+        # Check for similar product requests
+        for key in st.session_state.keys():
+            if key.startswith('show_similar_') and st.session_state[key]:
+                product_id = key.replace('show_similar_', '')
+                product = next((p for p in products if p['product_id'] == product_id), None)
+                if product:
+                    show_similar_products(product_id, product['product_name'])
+                    st.session_state[key] = False  # Reset the flag
+        
+        # Check for outfit recommendation requests
+        for key in st.session_state.keys():
+            if key.startswith('show_outfit_') and st.session_state[key]:
+                product_id = key.replace('show_outfit_', '')
+                product = next((p for p in products if p['product_id'] == product_id), None)
+                if product:
+                    show_outfit_recommendations(product_id, product['product_name'])
+                    st.session_state[key] = False  # Reset the flag
+    
+    else:
+        st.info("👆 Click 'Load Random Products' to start browsing our collection!")
 
 def show_similar_products(product_id, product_name):
     """Show similar products for a selected item"""
-    st.subheader(f"Similar to: {product_name}")
+    st.subheader(f"🔍 Similar to: {product_name}")
     
     with st.spinner("Finding similar products..."):
         results = search_by_product_id(product_id, top_k=8)
@@ -381,18 +516,23 @@ def show_similar_products(product_id, product_name):
         if results:
             st.success(f"Found {results['num_results']} similar items!")
             
-            # Display results in grid
+            # Display results in improved grid
             cols_per_row = 4
+            st.markdown('<div class="product-grid">', unsafe_allow_html=True)
+            
             for i in range(0, len(results['results']), cols_per_row):
-                cols = st.columns(cols_per_row)
+                cols = st.columns(cols_per_row, gap="medium")
                 
                 for j, col in enumerate(cols):
                     if i + j < len(results['results']):
                         product = results['results'][i + j]
                         
                         with col:
-                            st.markdown(f"**#{product['rank']}**")
+                            # Add rank indicator
+                            st.markdown(f'<div style="text-align: center; background-color: #059669; color: white; padding: 0.2rem; border-radius: 5px; margin-bottom: 0.5rem; font-weight: bold; font-size: 0.8rem;">#{product["rank"]}</div>', unsafe_allow_html=True)
                             display_product_card(product, show_similarity=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.warning("No similar products found.")
 
